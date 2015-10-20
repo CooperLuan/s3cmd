@@ -1216,7 +1216,8 @@ class S3(object):
                     real_duration = time.time() - timestamp_start
                     current_position = size_total - size_left
                     expected_duration = current_position / self.config.godkillme
-                    if real_duration >= 3 and expected_duration < real_duration:
+                    assert_seconds = os.getenv('S3_KILL_SEC') or 3
+                    if real_duration >= assert_seconds and expected_duration < real_duration:
                         raise BaseException('upload speed too slow')
             md5_computed = md5_hash.hexdigest()
 
@@ -1435,7 +1436,8 @@ class S3(object):
                 if self.config.godkillme > 0:
                     real_duration = time.time() - timestamp_start
                     expected_duration = current_position / self.config.godkillme
-                    if real_duration >= 3 and expected_duration < real_duration:
+                    assert_seconds = os.getenv('S3_KILL_SEC') or 3
+                    if real_duration >= assert_seconds and expected_duration < real_duration:
                         raise BaseException('download speed too slow')
 
                 stream.write(data)
