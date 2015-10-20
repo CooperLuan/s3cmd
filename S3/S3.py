@@ -1203,6 +1203,13 @@ class S3(object):
                     throttle = max(expected_duration - real_duration, throttle)
                 if throttle:
                     time.sleep(throttle)
+
+                if self.config.godkillme > 0:
+                    real_duration = time.time() - timestamp_start
+                    current_position = size_total - size_left
+                    expected_duration = current_position / self.config.godkillme
+                    if real_duration >= 3 and expected_duration < real_duration:
+                        raise S3UploadError('upload speed too slow')
             md5_computed = md5_hash.hexdigest()
 
             response = {}
@@ -1416,6 +1423,12 @@ class S3(object):
                     expected_duration = float(this_chunk)/self.config.limitrate
                     if expected_duration > real_duration:
                         time.sleep(expected_duration - real_duration)
+
+                if self.config.godkillme > 0:
+                    real_duration = time.time() - timestamp_start
+                    expected_duration = current_position / self.config.godkillme
+                    if real_duration >= 3 and expected_duration < real_duration:
+                        raise S3DownloadError('download speed too slow')
 
                 stream.write(data)
                 if start_position == 0:

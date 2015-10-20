@@ -124,6 +124,7 @@ class Config(object):
     expiry_prefix = ""
     signature_v2 = False
     limitrate = 0
+    godkillme = 0
     requester_pays = False
     stop_on_error = False
     content_disposition = None
@@ -282,6 +283,20 @@ class Config(object):
                     return
 
         elif option == "limitrate":
+            #convert kb,mb to bytes
+            if value.endswith("k") or value.endswith("K"):
+                shift = 10
+            elif value.endswith("m") or value.endswith("M"):
+                shift = 20
+            else:
+                shift = 0
+            try:
+                value = shift and int(value[:-1]) << shift or int(value)
+            except:
+                error("Config: value of option %s must have suffix m, k, or nothing, not '%s'" % (option, value))
+                return
+
+        elif option == "godkillme":
             #convert kb,mb to bytes
             if value.endswith("k") or value.endswith("K"):
                 shift = 10
