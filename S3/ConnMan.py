@@ -21,6 +21,8 @@ if not 'CertificateError ' in ssl.__dict__:
     ssl.CertificateError = CertificateError
 
 __all__ = [ "ConnMan" ]
+HTTP_CONNECTION_TIMEOUT = 5
+HTTPS_CONNECTION_TIMEOUT = 5
 
 class http_connection(object):
     context = None
@@ -121,9 +123,9 @@ class http_connection(object):
                 # back.  We then run the same check, relaxed for S3's
                 # wildcard certificates.
                 context.check_hostname = False
-            conn = httplib.HTTPSConnection(hostname, port, context=context)
+            conn = httplib.HTTPSConnection(hostname, port, context=context, timeout=HTTPS_CONNECTION_TIMEOUT)
         except TypeError:
-            conn = httplib.HTTPSConnection(hostname, port)
+            conn = httplib.HTTPSConnection(hostname, port, timeout=HTTPS_CONNECTION_TIMEOUT)
         return conn
 
     def __init__(self, id, hostname, ssl, cfg):
@@ -134,10 +136,10 @@ class http_connection(object):
 
         if not ssl:
             if cfg.proxy_host != "":
-                self.c = httplib.HTTPConnection(cfg.proxy_host, cfg.proxy_port)
+                self.c = httplib.HTTPConnection(cfg.proxy_host, cfg.proxy_port, timeout=HTTP_CONNECTION_TIMEOUT)
                 debug(u'proxied HTTPConnection(%s, %s)' % (cfg.proxy_host, cfg.proxy_port))
             else:
-                self.c = httplib.HTTPConnection(hostname)
+                self.c = httplib.HTTPConnection(hostname, timeout=HTTP_CONNECTION_TIMEOUT)
                 debug(u'non-proxied HTTPConnection(%s)' % hostname)
         else:
             if cfg.proxy_host != "":
